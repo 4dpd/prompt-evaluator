@@ -1,21 +1,144 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>프롬프트 평가 도우미</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬프트 평가 도우미</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+  .app-bar { background: #534AB7; color: white; padding: 14px 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
+  .panel { background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
+  .panel-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+  .panel-num { width: 20px; height: 20px; border-radius: 50%; background: #EEEDFE; color: #3C3489; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .panel-body { padding: 14px; }
+  .panel-left { grid-column: 1; grid-row: 1 / 3; }
+  .panel-right-top { grid-column: 2; grid-row: 1; }
+  .panel-right-bot { grid-column: 2; grid-row: 2; }
+  textarea { width: 100%; min-height: 160px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; background: #fafafa; }
+  textarea:focus { border-color: #7F77DD; background: white; }
+  .hint-box { margin-top: 12px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border: 1px solid #f0f0f0; }
+  .hint-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .hint-item { font-size: 12px; color: #666; padding: 4px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
+  .hint-item:last-child { border-bottom: none; }
+  .example-slider { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slider-label { font-size: 11px; font-weight: 700; color: #1D9E75; text-transform: uppercase; letter-spacing: 0.04em; }
+  .slider-nav-btns { display: flex; gap: 4px; align-items: center; }
+  .snav { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .dots { display: flex; gap: 3px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #ddd; }
+  .dot.on { background: #7F77DD; }
+  .example-card { font-size: 12px; color: #555; line-height: 1.7; background: white; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 70px; transition: opacity 0.2s; }
+  .example-card b { color: #222; }
+  .etags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .etag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+  .t-role { background: #E6F1FB; color: #0C447C; }
+  .t-ctx  { background: #FBEAF0; color: #72243E; }
+  .t-task { background: #EAF3DE; color: #3B6D11; }
+  .t-fmt  { background: #FAEEDA; color: #633806; }
+  .submit-btn { width: 100%; margin-top: 12px; padding: 11px; background: #534AB7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .submit-btn:hover { background: #3C3489; }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+  .good-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #E1F5EE; color: #0F6E56; font-weight: 600; margin-bottom: 8px; }
+  .p2-text { font-size: 12px; color: #555; line-height: 1.7; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 100px; transition: opacity 0.2s; }
+  .p2-text b { color: #222; }
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .score-circle { width: 56px; height: 56px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; }
+  .score-num { font-size: 22px; font-weight: 700; color: #3C3489; line-height: 1; }
+  .score-den { font-size: 10px; color: #7F77DD; }
+  .score-bar-wrap { flex: 1; }
+  .score-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .score-fill { height: 100%; background: #7F77DD; border-radius: 3px; transition: width 0.6s ease; }
+  .breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+  .bd-item { background: #fafafa; border-radius: 6px; padding: 6px 8px; font-size: 11px; }
+  .bd-name { color: #888; margin-bottom: 2px; }
+  .bd-bar { height: 4px; background: #e8e8e8; border-radius: 2px; overflow: hidden; }
+  .bd-fill { height: 100%; background: #AFA9EC; border-radius: 2px; }
+  .bd-score { color: #534AB7; font-weight: 700; font-size: 12px; }
+  .fb-list { margin-bottom: 10px; }
+  .fb-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; color: #555; line-height: 1.5; }
+  .fb-item:last-child { border-bottom: none; }
+  .sug-block { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+  .sug-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .sug-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sug-card { font-size: 12px; color: #555; background: #EEEDFE; border: 1px solid #AFA9EC; border-radius: 8px; padding: 10px 12px; min-height: 60px; line-height: 1.7; transition: opacity 0.2s; }
+  .sug-card .diff { background: #AFA9EC; color: #26215C; border-radius: 3px; padding: 0 3px; font-weight: 600; }
+  .placeholder { text-align: center; padding: 28px 0; color: #bbb; font-size: 13px; }
+  .loading { text-align: center; padding: 24px 0; color: #7F77DD; font-size: 13px; }
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .panel-left, .panel-right-top, .panel-right-bot { grid-column: 1; grid-row: auto; }
+  }
+</style>
 </head>
 <body>
-  <h1>Firebase 연결 테스트</h1>
-  <p id="status">연결 중...</p>
 
-  <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<div class="app-bar">✦ 프롬프트 평가 도우미 <span style="font-size:11px;opacity:0.7;font-weight:400;">for Gemini</span></div>
 
+<div class="layout">
+  <!-- 패널 1 -->
+  <div class="panel panel-left">
+    <div class="panel-header"><div class="panel-num">1</div> 내 프롬프트 작성</div>
+    <div class="panel-body">
+      <textarea id="prompt-input" placeholder="여기에 Gemini에게 보낼 프롬프트를 입력하세요."></textarea>
+      <div class="hint-box">
+        <div class="hint-label">이런 내용을 추가해보세요</div>
+        <div class="hint-item">👤 나는 누구인가요? (역할, 직업)</div>
+        <div class="hint-item">🎯 이 결과물을 누가 읽나요?</div>
+        <div class="hint-item">📄 어떤 형식으로 출력할까요?</div>
+        <div class="hint-item">🚫 포함하지 말았으면 하는 것?</div>
+        <div class="example-slider">
+          <div class="slider-header">
+            <div class="slider-label">💡 프롬프트 예시</div>
+            <div class="slider-nav-btns">
+              <button class="snav" onclick="hintPrev()"><</button>
+              <div class="dots" id="hint-dots"></div>
+              <button class="snav" onclick="hintNext()">></button>
+            </div>
+          </div>
+          <div class="example-card" id="hint-card"></div>
+        </div>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="evaluate()">제출해서 평가받기</button>
+    </div>
+  </div>
+
+  <!-- 패널 2 -->
+  <div class="panel panel-right-top">
+    <div class="panel-header"><div class="panel-num">2</div> 잘 작성된 프롬프트 예시</div>
+    <div class="panel-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="good-chip">✓ 수정 후 완성 예시</div>
+        <div class="slider-nav-btns">
+          <button class="snav" onclick="p2Prev()"><</button>
+          <div class="dots" id="p2-dots"></div>
+          <button class="snav" onclick="p2Next()">></button>
+        </div>
+      </div>
+      <div class="p2-text" id="p2-text"></div>
+      <div class="etags" id="p2-tags" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- 패널 3 -->
+  <div class="panel panel-right-bot">
+    <div class="panel-header"><div class="panel-num">3</div> 프롬프트 평가 결과</div>
+    <div class="panel-body" id="result-body">
+      <div class="placeholder">프롬프트를 입력하고 제출하면<br>평가 결과가 여기에 표시돼요.</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, addDoc, collection }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ★ 여기에 2단계 firebaseConfig 붙여넣기
 const firebaseConfig = {
-  apiKey: "AIzaSyCX_blcSTiQTGcj4bn-NC-OArXGJDD07yU",
+  apiKey: "AI...",
   authDomain: "prompt-evaluator-f3544.firebaseapp.com",
   projectId: "prompt-evaluator-f3544",
   storageBucket: "prompt-evaluator-f3544.firebasestorage.app",
@@ -23,11 +146,134 @@ const firebaseConfig = {
   appId: "1:370613778053:web:67103f3885f8fe02eb9bec"
 };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let GEMINI_KEY = "";
 
-    await setDoc(doc(db, "test", "hello"), { msg: "연결 성공!" });
-    document.getElementById("status").textContent = "Firebase 연결 성공!";
-  </script>
+// Firestore에서 API 키 로드
+async function loadKey() {
+  const snap = await getDoc(doc(db, "config", "keys"));
+  if (snap.exists()) GEMINI_KEY = snap.data().geminiKey;
+}
+loadKey();
+
+// 예시 데이터
+const hintExamples = [
+  { text: "나는 <b>중학교 2학년 국어 교사</b>야. 학생들에게 시의 운율을 처음 가르치는데, 쉬운 예시 시 3편과 운율 특징을 <b>표로 정리</b>해줘. <b>중학생 수준</b>으로.", tags:["t-role","t-ctx","t-fmt"] },
+  { text: "나는 <b>스타트업 마케터</b>야. 친환경 텀블러 인스타 캡션을 써줘. 타깃은 <b>20대 여성</b>, <b>150자 이내</b>, 이모지 포함, 행동 유도 문구 넣어줘.", tags:["t-role","t-ctx","t-fmt","t-task"] },
+  { text: "나는 <b>취업 준비생</b>이야. IT 회사 자기소개서 <b>첫 문단</b>을 써줘. 강점은 문제해결력·협업. <b>800자 이내</b>, 자연스러운 어투.", tags:["t-role","t-ctx","t-fmt"] }
+];
+const tagLabels = { "t-role":"역할 명시","t-ctx":"맥락 제공","t-task":"구체적 요청","t-fmt":"형식 지정" };
+
+const p2Examples = [
+  { text: "나는 <b>초등 3학년 담임 교사</b>야. 분수 기본 개념을 <b>피자 소재</b>로 재미있게 설명해줘. <b>5분 분량</b>, 학생 <b>참여 활동 1가지</b> 포함.", tags:["t-role","t-ctx","t-task","t-fmt"] },
+  { text: "나는 <b>고등학교 수학 교사</b>야. 이차함수 최댓값·최솟값 <b>40분 수업 계획서</b>를 만들어줘. 개념→예제→연습 순서, 난이도 하·중·상 각 1문제씩.", tags:["t-role","t-task","t-fmt","t-ctx"] },
+  { text: "나는 <b>중학교 영어 교사</b>야. 현재완료 예문 <b>10개</b> 만들어줘. 각 예문마다 <b>한국어 번역</b>과 현재완료 이유를 <b>한 문장</b>으로.", tags:["t-role","t-task","t-fmt"] }
+];
+
+let hi=0, p2i=0, sugi=0;
+
+function makeDots(id, total, cur) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i===cur?' on':'');el.appendChild(d);}
+}
+function renderHint() {
+  const e=hintExamples[hi];
+  const c=document.getElementById('hint-card');
+  c.style.opacity='0';
+  setTimeout(()=>{
+    c.innerHTML=e.text+'<div class="etags">'+e.tags.map(t=>`<span class="etag ${t}">${tagLabels[t]}</span>`).join('')+'</div>';
+    makeDots('hint-dots',hintExamples.length,hi);
+    c.style.opacity='1';
+  },150);
+}
+function renderP2() {
+  const e=p2Examples[p2i];
+  const t=document.getElementById('p2-text');
+  t.style.opacity='0';
+  setTimeout(()=>{
+    t.innerHTML=e.text;
+    document.getElementById('p2-tags').innerHTML=e.tags.map(t=>`<span class="etag ${t}">${tagLabels[t]}</span>`).join('');
+    makeDots('p2-dots',p2Examples.length,p2i);
+    t.style.opacity='1';
+  },150);
+}
+
+window.hintNext=()=>{hi=(hi+1)%hintExamples.length;renderHint();}
+window.hintPrev=()=>{hi=(hi-1+hintExamples.length)%hintExamples.length;renderHint();}
+window.p2Next=()=>{p2i=(p2i+1)%p2Examples.length;renderP2();}
+window.p2Prev=()=>{p2i=(p2i-1+p2Examples.length)%p2Examples.length;renderP2();}
+
+renderHint(); renderP2();
+
+const SYSTEM_PROMPT = `당신은 AI 프롬프트 전문 평가자입니다. 학생이 작성한 프롬프트를 평가하고 반드시 JSON만 응답하세요.
+[평가기준] 역할명시(20점), 맥락제공(20점), 구체적요청(25점), 형식지정(20점), 제약조건(15점)
+[응답형식]
+{"score":숫자,"breakdown":{"역할 명시":숫자,"맥락 제공":숫자,"구체적 요청":숫자,"형식 지정":숫자,"제약 조건":숫자},"good":["잘된점1","잘된점2"],"improve":["보완점1","보완점2"],"suggestion":"수정된 프롬프트 전체 예시"}`;
+
+window.evaluate = async function() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  if(!prompt){alert('프롬프트를 입력해주세요!');return;}
+  if(!GEMINI_KEY){alert('API 키를 불러오는 중이에요. 잠시 후 다시 눌러주세요.');return;}
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled=true; btn.textContent='평가 중...';
+  document.getElementById('result-body').innerHTML='<div class="loading">Gemini가 평가 중이에요...</div>';
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:SYSTEM_PROMPT+'\n\n[학생 프롬프트]\n'+prompt}]}],
+        generationConfig:{responseMimeType:'application/json'}
+      })
+    });
+    const data = await res.json();
+    const result = JSON.parse(data.candidates[0].content.parts[0].text);
+
+    // Firestore에 저장
+    await addDoc(collection(db,'evaluations'),{
+      prompt, score:result.score,
+      createdAt: new Date().toISOString()
+    });
+
+    renderResult(result);
+  } catch(e) {
+    document.getElementById('result-body').innerHTML='<div class="placeholder">오류가 발생했어요.<br>잠시 후 다시 시도해주세요.</div>';
+  }
+  btn.disabled=false; btn.textContent='제출해서 평가받기';
+};
+
+function renderResult(r) {
+  const pct = r.score;
+  const bd = r.breakdown;
+  const maxes = {"역할 명시":20,"맥락 제공":20,"구체적 요청":25,"형식 지정":20,"제약 조건":15};
+  const bdHtml = Object.entries(bd).map(([k,v])=>`
+    <div class="bd-item">
+      <div style="display:flex;justify-content:space-between;"><div class="bd-name">${k}</div><div class="bd-score">${v}</div></div>
+      <div class="bd-bar"><div class="bd-fill" style="width:${Math.round(v/maxes[k]*100)}%"></div></div>
+    </div>`).join('');
+  const goodHtml = r.good.map(g=>`<div class="fb-item"><span style="color:#1D9E75">✓</span>${g}</div>`).join('');
+  const impHtml  = r.improve.map(i=>`<div class="fb-item"><span style="color:#BA7517">△</span>${i}</div>`).join('');
+  const sugHtml  = r.suggestion.replace(/(.{1,30})/g,'$1').replace(/\n/g,'<br>');
+
+  document.getElementById('result-body').innerHTML=`
+    <div class="score-row">
+      <div class="score-circle"><div class="score-num">${pct}</div><div class="score-den">/ 100</div></div>
+      <div class="score-bar-wrap">
+        <div style="font-size:12px;color:#888;">전체 완성도</div>
+        <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>
+    <div class="breakdown">${bdHtml}</div>
+    <div class="fb-list">${goodHtml}${impHtml}</div>
+    <div class="sug-block">
+      <div class="sug-header"><div class="sug-label">✦ 이렇게 수정해보세요</div></div>
+      <div class="sug-card">${r.suggestion}</div>
+    </div>`;
+}
+</script>
 </body>
 </html>
