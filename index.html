@@ -5,102 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>프롬프트 평가 도우미</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #1a1a1a; }
-  .app-bar { background: #534AB7; color: white; padding: 14px 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
-  .panel { background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
-  .panel-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
-  .panel-num { width: 20px; height: 20px; border-radius: 50%; background: #EEEDFE; color: #3C3489; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .panel-body { padding: 14px; }
-  .panel-left { grid-column: 1; grid-row: 1 / 3; }
-  .panel-right-top { grid-column: 2; grid-row: 1; }
-  .panel-right-bot { grid-column: 2; grid-row: 2; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+.app-bar { background: #534AB7; color: white; padding: 14px 24px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
+.panel { background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
+.panel-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.panel-num { width: 20px; height: 20px; border-radius: 50%; background: #EEEDFE; color: #3C3489; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.panel-body { padding: 14px; }
+.panel-left { grid-column: 1; grid-row: 1 / 3; }
+.panel-right-top { grid-column: 2; grid-row: 1; }
+.panel-right-bot { grid-column: 2; grid-row: 2; }
 
-  .tab-bar { display: flex; gap: 4px; margin-bottom: 12px; background: #f5f5f5; border-radius: 8px; padding: 3px; }
-  .tab { flex: 1; padding: 7px; border: none; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: #888; font-family: inherit; transition: all 0.15s; }
-  .tab.active { background: white; color: #534AB7; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 12px; background: #f5f5f5; border-radius: 8px; padding: 3px; }
+.tab { flex: 1; padding: 7px; border: none; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: #888; font-family: inherit; transition: all 0.15s; }
+.tab.active { background: white; color: #534AB7; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
-  textarea { width: 100%; min-height: 130px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; background: #fafafa; line-height: 1.6; }
-  textarea:focus { border-color: #7F77DD; background: white; }
+textarea { width: 100%; min-height: 120px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; background: #fafafa; line-height: 1.6; }
+textarea:focus { border-color: #7F77DD; background: white; }
 
-  /* 구조화 */
-  .struct-form { display: flex; flex-direction: column; gap: 8px; }
-  .struct-loading { text-align: center; padding: 20px 0; color: #7F77DD; font-size: 13px; }
-  .struct-empty { text-align: center; padding: 20px 0; color: #bbb; font-size: 13px; }
-  .struct-field { display: flex; flex-direction: column; gap: 4px; }
-  .struct-label { font-size: 11px; font-weight: 700; color: #534AB7; display: flex; align-items: center; gap: 5px; }
-  .struct-label .s-badge { background: #EEEDFE; border-radius: 4px; padding: 1px 7px; }
-  .struct-input { border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; background: #fafafa; resize: none; min-height: 40px; line-height: 1.6; width: 100%; }
-  .struct-input:focus { border-color: #7F77DD; background: white; }
-  .struct-preview { margin-top: 8px; background: #EEEDFE; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #3C3489; line-height: 1.7; border: 1px solid #AFA9EC; position: relative; }
-  .struct-preview-label { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
-  .copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 6px; border: 1px solid #AFA9EC; background: white; font-size: 11px; font-weight: 600; color: #534AB7; cursor: pointer; font-family: inherit; }
-  .copy-btn:hover { background: #EEEDFE; }
+.hint-box { margin-top: 10px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border: 1px solid #f0f0f0; }
+.hint-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.hint-item { font-size: 12px; color: #666; padding: 4px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
+.hint-item:last-child { border-bottom: none; }
 
-  /* 힌트 */
-  .hint-box { margin-top: 10px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border: 1px solid #f0f0f0; }
-  .hint-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-  .hint-item { font-size: 12px; color: #666; padding: 4px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
-  .hint-item:last-child { border-bottom: none; }
+.example-slider { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+.slider-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.slider-lbl { font-size: 11px; font-weight: 700; color: #1D9E75; text-transform: uppercase; letter-spacing: 0.04em; }
+.snav-wrap { display: flex; gap: 4px; align-items: center; }
+.snav { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.dots { display: flex; gap: 3px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: #ddd; }
+.dot.on { background: #7F77DD; }
 
-  /* 슬라이더 */
-  .example-slider { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
-  .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .slider-label { font-size: 11px; font-weight: 700; color: #1D9E75; text-transform: uppercase; letter-spacing: 0.04em; }
-  .slider-nav-btns { display: flex; gap: 4px; align-items: center; }
-  .snav { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #e0e0e0; background: white; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-  .dots { display: flex; gap: 3px; }
-  .dot { width: 5px; height: 5px; border-radius: 50%; background: #ddd; }
-  .dot.on { background: #7F77DD; }
-  .example-card { font-size: 12px; color: #555; line-height: 1.7; background: white; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 60px; transition: opacity 0.2s; position: relative; }
-  .example-card b { color: #222; }
-  .card-copy-btn { position: absolute; top: 8px; right: 8px; padding: 3px 10px; border-radius: 6px; border: 1px solid #e0e0e0; background: white; font-size: 11px; font-weight: 600; color: #534AB7; cursor: pointer; font-family: inherit; }
-  .card-copy-btn:hover { background: #EEEDFE; border-color: #AFA9EC; }
-  .etags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-  .etag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
-  .t-role { background: #E6F1FB; color: #0C447C; }
-  .t-ctx  { background: #FBEAF0; color: #72243E; }
-  .t-task { background: #EAF3DE; color: #3B6D11; }
-  .t-fmt  { background: #FAEEDA; color: #633806; }
+.example-card { font-size: 12px; color: #555; line-height: 1.7; background: white; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 60px; transition: opacity 0.2s; }
+.example-card b { color: #222; }
+.card-actions { display: flex; gap: 6px; margin-top: 8px; }
+.btn-sm { flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid #e0e0e0; background: white; font-size: 11px; font-weight: 600; color: #534AB7; cursor: pointer; font-family: inherit; text-align: center; }
+.btn-sm:hover { background: #EEEDFE; border-color: #AFA9EC; }
+.btn-sm.fill { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; }
+.btn-sm.fill:hover { background: #AFA9EC; }
 
-  .submit-btn { width: 100%; margin-top: 10px; padding: 11px; background: #534AB7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
-  .submit-btn:hover { background: #3C3489; }
-  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+.etags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.etag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.t-role { background: #E6F1FB; color: #0C447C; }
+.t-ctx  { background: #FBEAF0; color: #72243E; }
+.t-task { background: #EAF3DE; color: #3B6D11; }
+.t-fmt  { background: #FAEEDA; color: #633806; }
 
-  /* 패널2 */
-  .good-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #E1F5EE; color: #0F6E56; font-weight: 600; }
-  .p2-card { font-size: 12px; color: #555; line-height: 1.7; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 80px; transition: opacity 0.2s; position: relative; }
-  .p2-card b { color: #222; }
+/* 자유입력 → 구조화 유도 배너 */
+.suggest-banner { display: none; margin-top: 10px; background: #E1F5EE; border: 1px solid #5DCAA5; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #085041; display: flex; align-items: center; gap: 8px; }
+.suggest-banner button { margin-left: auto; padding: 5px 12px; border-radius: 6px; border: none; background: #1D9E75; color: white; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
 
-  /* 패널3 */
-  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-  .score-circle { width: 56px; height: 56px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; }
-  .score-num { font-size: 22px; font-weight: 700; color: #3C3489; line-height: 1; }
-  .score-den { font-size: 10px; color: #7F77DD; }
-  .score-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-  .score-fill { height: 100%; background: #7F77DD; border-radius: 3px; transition: width 0.6s ease; }
-  .breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
-  .bd-item { background: #fafafa; border-radius: 6px; padding: 6px 8px; font-size: 11px; }
-  .bd-name { color: #888; margin-bottom: 2px; }
-  .bd-bar { height: 4px; background: #e8e8e8; border-radius: 2px; overflow: hidden; }
-  .bd-fill { height: 100%; background: #AFA9EC; border-radius: 2px; }
-  .bd-score { color: #534AB7; font-weight: 700; font-size: 12px; }
-  .fb-list { margin-bottom: 12px; }
-  .fb-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; color: #555; line-height: 1.5; }
-  .fb-item:last-child { border-bottom: none; }
-  .sug-block { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
-  .sug-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .sug-structured { display: flex; flex-direction: column; gap: 6px; }
-  .sug-row { background: #EEEDFE; border-radius: 8px; padding: 8px 12px; font-size: 12px; line-height: 1.6; }
-  .sug-row-label { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
-  .sug-row-val { color: #26215C; }
-  .placeholder { text-align: center; padding: 28px 0; color: #bbb; font-size: 13px; }
-  .loading { text-align: center; padding: 24px 0; color: #7F77DD; font-size: 13px; }
-  @media (max-width: 700px) {
-    .layout { grid-template-columns: 1fr; }
-    .panel-left, .panel-right-top, .panel-right-bot { grid-column: 1; grid-row: auto; }
-  }
+/* 구조화 */
+.struct-empty { text-align: center; padding: 20px 0; color: #bbb; font-size: 12px; line-height: 1.7; }
+.struct-field { margin-bottom: 10px; }
+.struct-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.struct-lbl { font-size: 11px; font-weight: 700; color: #534AB7; display: flex; align-items: center; gap: 5px; }
+.struct-lbl .s-badge { background: #EEEDFE; border-radius: 4px; padding: 1px 7px; }
+.struct-hint { font-size: 11px; color: #1D9E75; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+.struct-input { border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; background: #fafafa; width: 100%; line-height: 1.6; }
+.struct-input:focus { border-color: #7F77DD; background: white; }
+
+.struct-preview { margin-top: 12px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
+.struct-preview-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.struct-rows { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.struct-row { background: #EEEDFE; border-radius: 7px; padding: 7px 11px; font-size: 12px; line-height: 1.6; }
+.struct-row-lbl { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.struct-row-val { color: #26215C; }
+.struct-preview-actions { display: flex; gap: 6px; }
+
+.submit-btn { width: 100%; margin-top: 10px; padding: 11px; background: #534AB7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.submit-btn:hover { background: #3C3489; }
+.submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+/* 패널2 */
+.good-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #E1F5EE; color: #0F6E56; font-weight: 600; }
+.p2-card { font-size: 12px; color: #555; line-height: 1.7; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 80px; transition: opacity 0.2s; }
+.p2-card b { color: #222; }
+.p2-struct { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.p2-row { background: white; border: 1px solid #f0f0f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+.p2-row-lbl { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.p2-row-val { color: #333; line-height: 1.5; }
+
+/* 패널3 */
+.score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.score-circle { width: 56px; height: 56px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; }
+.score-num { font-size: 22px; font-weight: 700; color: #3C3489; line-height: 1; }
+.score-den { font-size: 10px; color: #7F77DD; }
+.score-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.score-fill { height: 100%; background: #7F77DD; border-radius: 3px; transition: width 0.6s ease; }
+.breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.bd-item { background: #fafafa; border-radius: 6px; padding: 6px 8px; font-size: 11px; }
+.bd-name { color: #888; margin-bottom: 2px; }
+.bd-bar { height: 4px; background: #e8e8e8; border-radius: 2px; overflow: hidden; }
+.bd-fill { height: 100%; background: #AFA9EC; border-radius: 2px; }
+.bd-score { color: #534AB7; font-weight: 700; font-size: 12px; }
+.fb-section { margin-bottom: 10px; }
+.fb-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+.fb-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; color: #555; line-height: 1.5; }
+.fb-item:last-child { border-bottom: none; }
+
+/* 수정 제안 */
+.sug-block { border-top: 1px solid #f0f0f0; padding-top: 10px; }
+.sug-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sug-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: 0.04em; }
+.sug-rows { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+.sug-row { background: #EEEDFE; border-radius: 7px; padding: 7px 11px; font-size: 12px; line-height: 1.6; }
+.sug-row-lbl { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.sug-row-val { color: #26215C; }
+.apply-btn { width: 100%; padding: 9px; border-radius: 8px; border: none; background: #534AB7; color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.apply-btn:hover { background: #3C3489; }
+
+.placeholder { text-align: center; padding: 28px 0; color: #bbb; font-size: 13px; line-height: 1.7; }
+.loading { text-align: center; padding: 24px 0; color: #7F77DD; font-size: 13px; }
+
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .panel-left, .panel-right-top, .panel-right-bot { grid-column: 1; grid-row: auto; }
+}
 </style>
 </head>
 <body>
@@ -118,14 +141,22 @@
 
       <!-- 자유 입력 -->
       <div id="tab-free">
-        <textarea id="prompt-input" placeholder="여기에 만들고 싶은 것, 하고 싶은 것을 자유롭게 입력하세요.&#10;&#10;예) 축구 게임을 html로 만들고 싶어." oninput="onFreeInput()"></textarea>
+        <textarea id="prompt-input" placeholder="만들고 싶은 것, 하고 싶은 것을 자유롭게 써봐!&#10;&#10;예) 축구 게임을 html로 만들고 싶어." oninput="onFreeInput()"></textarea>
+        <div id="suggest-banner" style="display:none; margin-top:10px; background:#E1F5EE; border:1px solid #5DCAA5; border-radius:8px; padding:10px 12px; font-size:12px; color:#085041; align-items:center; gap:8px;">
+          💡 더 잘 쓸 수 있어! 구조화해서 작성해볼래?
+          <button onclick="goStruct()" style="margin-left:auto;padding:5px 12px;border-radius:6px;border:none;background:#1D9E75;color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">구조화 입력 →</button>
+        </div>
         <div class="hint-box">
           <div class="hint-label">💡 프롬프트 예시</div>
-          <div id="hint-card" class="example-card" style="margin-top:4px;">
+          <div id="hint-card" class="example-card">
             <span style="color:#bbb;font-size:12px;">내용을 입력하면 관련 예시가 나타나요.</span>
           </div>
+          <div class="card-actions" id="hint-actions" style="display:none;">
+            <button class="btn-sm" onclick="copyHint()">📋 복사</button>
+            <button class="btn-sm fill" onclick="applyHint()">✏️ 입력창에 넣기</button>
+          </div>
           <div style="display:flex;justify-content:flex-end;margin-top:6px;">
-            <div class="slider-nav-btns">
+            <div class="snav-wrap">
               <button class="snav" onclick="hintPrev()"><</button>
               <div class="dots" id="hint-dots"></div>
               <button class="snav" onclick="hintNext()">></button>
@@ -137,12 +168,17 @@
       <!-- 구조화 입력 -->
       <div id="tab-struct" style="display:none;">
         <div id="struct-form-wrap">
-          <div class="struct-empty">왼쪽 "자유 입력"에 내용을 먼저 입력하면<br>관련 항목이 자동으로 생성돼요.</div>
+          <div class="struct-empty">왼쪽 <strong style="color:#534AB7;">"자유 입력"</strong>에 내용을 먼저 입력하면<br>맞춤 항목이 자동으로 생성돼!</div>
         </div>
-        <div class="struct-preview" id="struct-preview" style="display:none;">
-          <div class="struct-preview-label">✦ 완성된 프롬프트</div>
-          <button class="copy-btn" onclick="copyStructPrompt()">복사</button>
-          <div id="struct-preview-text" style="color:#aaa;font-size:12px;">항목을 입력하면 자동으로 조합돼요.</div>
+        <div id="struct-preview" style="display:none;">
+          <div class="struct-preview">
+            <div class="struct-preview-label">✦ 완성된 프롬프트</div>
+            <div class="struct-rows" id="struct-rows"></div>
+            <div class="struct-preview-actions">
+              <button class="btn-sm" onclick="copyStruct()">📋 복사</button>
+              <button class="btn-sm fill" onclick="applyStruct()">✏️ 자유 입력창에 넣기</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -156,16 +192,20 @@
     <div class="panel-body">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div class="good-chip">✓ 관련 예시</div>
-        <div class="slider-nav-btns">
+        <div class="snav-wrap">
           <button class="snav" onclick="p2Prev()"><</button>
           <div class="dots" id="p2-dots"></div>
           <button class="snav" onclick="p2Next()">></button>
         </div>
       </div>
-      <div class="p2-card" id="p2-card">
+      <div id="p2-card" class="p2-card">
         <span style="color:#bbb;font-size:12px;">프롬프트를 입력하면 관련 예시가 표시돼요.</span>
       </div>
       <div class="etags" id="p2-tags" style="margin-top:8px;"></div>
+      <div class="card-actions" id="p2-actions" style="display:none;margin-top:8px;">
+        <button class="btn-sm" onclick="copyP2()">📋 복사</button>
+        <button class="btn-sm fill" onclick="applyP2()">✏️ 입력창에 넣기</button>
+      </div>
     </div>
   </div>
 
@@ -173,7 +213,7 @@
   <div class="panel panel-right-bot">
     <div class="panel-header"><div class="panel-num">3</div> 프롬프트 평가 결과</div>
     <div class="panel-body" id="result-body">
-      <div class="placeholder">프롬프트를 입력하고 제출하면<br>평가 결과가 여기에 표시돼요.</div>
+      <div class="placeholder">프롬프트를 입력하고<br>제출하면 평가 결과가 나와요!</div>
     </div>
   </div>
 </div>
@@ -202,8 +242,7 @@ async function loadKey() {
 }
 loadKey();
 
-// ── Gemini 호출 ──
-async function callGemini(promptText) {
+async function callGemini(text) {
   const isNew = GEMINI_KEY.startsWith('AQ.');
   const url = isNew
     ? 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
@@ -213,7 +252,7 @@ async function callGemini(promptText) {
   const res = await fetch(url, {
     method:'POST', headers,
     body: JSON.stringify({
-      contents:[{parts:[{text: promptText}]}],
+      contents:[{parts:[{text}]}],
       generationConfig:{responseMimeType:'application/json'}
     })
   });
@@ -222,47 +261,52 @@ async function callGemini(promptText) {
   return JSON.parse(data.candidates[0].content.parts[0].text);
 }
 
-// ── 탭 전환 ──
+// 탭
 window.switchTab = function(tab) {
   document.getElementById('tab-free').style.display   = tab==='free'   ? 'block':'none';
   document.getElementById('tab-struct').style.display = tab==='struct' ? 'block':'none';
   document.getElementById('tab-btn-free').classList.toggle('active',   tab==='free');
   document.getElementById('tab-btn-struct').classList.toggle('active', tab==='struct');
 };
+window.goStruct = function() { window.switchTab('struct'); };
 
-// ── 자유입력 → 구조화·예시 자동 갱신 ──
-let aiTimer = null;
-let structFields = [];  // [{emoji, label, placeholder, key}]
+// 상태
+let structFields = [];
 let hintExamples = [];
 let p2Examples = [];
 let hi=0, p2i=0;
+let lastInput = '';
+let aiTimer = null;
+let currentHintText = '';
+let currentP2Text = '';
 
 window.onFreeInput = function() {
-  clearTimeout(aiTimer);
   const val = document.getElementById('prompt-input').value.trim();
+  if (val.length > 5) {
+    document.getElementById('suggest-banner').style.display = 'flex';
+  } else {
+    document.getElementById('suggest-banner').style.display = 'none';
+  }
+  clearTimeout(aiTimer);
   if (!val) return;
-  aiTimer = setTimeout(() => generateAllFromInput(val), 1500);
+  aiTimer = setTimeout(() => {
+    if (val !== lastInput) { lastInput = val; generateAll(val); }
+  }, 2000);
 };
 
-async function generateAllFromInput(input) {
+async function generateAll(input) {
   if (!GEMINI_KEY) return;
-
-  // 1. 구조화 필드 생성
-  document.getElementById('struct-form-wrap').innerHTML = '<div class="struct-loading">🧩 관련 항목 생성 중...</div>';
-  document.getElementById('struct-preview').style.display = 'none';
-
-  // 2. 힌트 예시 로딩 표시
-  document.getElementById('hint-card').innerHTML = '<span style="color:#7F77DD;font-size:12px;">관련 예시 생성 중...</span>';
-  document.getElementById('hint-dots').innerHTML = '';
-
-  // 3. 패널2 로딩
-  document.getElementById('p2-card').innerHTML = '<span style="color:#7F77DD;font-size:12px;">관련 예시 생성 중...</span>';
+  document.getElementById('hint-card').innerHTML = '<span style="color:#7F77DD;font-size:12px;">✨ 관련 예시 생성 중...</span>';
+  document.getElementById('hint-actions').style.display = 'none';
+  document.getElementById('p2-card').innerHTML = '<span style="color:#7F77DD;font-size:12px;">✨ 관련 예시 생성 중...</span>';
+  document.getElementById('p2-actions').style.display = 'none';
   document.getElementById('p2-tags').innerHTML = '';
-  document.getElementById('p2-dots').innerHTML = '';
+  document.getElementById('struct-form-wrap').innerHTML = '<div class="struct-empty">✨ 맞춤 항목 생성 중...</div>';
+  document.getElementById('struct-preview').style.display = 'none';
 
   try {
     const result = await callGemini(`
-다음 입력 내용을 분석해서 아래 3가지를 JSON으로 만들어줘.
+다음 입력을 분석해서 JSON으로 응답해줘. 대상은 초등학교 고학년~중학교 1학년 학생이야. 쉽고 친근한 말투로 작성해줘.
 반드시 JSON만 응답하고 다른 텍스트는 쓰지 마.
 
 [입력]
@@ -271,178 +315,228 @@ ${input}
 [응답 형식]
 {
   "structFields": [
-    {"emoji":"👤","label":"항목이름","placeholder":"입력 안내 예시","key":"field1"},
-    {"emoji":"🎯","label":"항목이름","placeholder":"입력 안내 예시","key":"field2"},
-    {"emoji":"🌍","label":"항목이름","placeholder":"입력 안내 예시","key":"field3"},
-    {"emoji":"📄","label":"항목이름","placeholder":"입력 안내 예시","key":"field4"},
-    {"emoji":"🚫","label":"항목이름","placeholder":"입력 안내 예시","key":"field5"}
+    {"emoji":"🎮","label":"항목이름","hint":"이 항목에 대한 예시 문장 (입력 주제와 관련된 구체적인 예)","key":"f1"},
+    {"emoji":"🎯","label":"항목이름","hint":"이 항목에 대한 예시 문장","key":"f2"},
+    {"emoji":"🌟","label":"항목이름","hint":"이 항목에 대한 예시 문장","key":"f3"},
+    {"emoji":"📋","label":"항목이름","hint":"이 항목에 대한 예시 문장","key":"f4"},
+    {"emoji":"🚫","label":"항목이름","hint":"이 항목에 대한 예시 문장","key":"f5"}
   ],
   "hintExamples": [
-    {"text":"입력 내용과 관련된 잘 작성된 프롬프트 예시1 (핵심 단어는 **굵게** 표시)","tags":["역할 명시","맥락 제공"]},
-    {"text":"입력 내용과 관련된 잘 작성된 프롬프트 예시2 (핵심 단어는 **굵게** 표시)","tags":["구체적 요청","형식 지정"]},
-    {"text":"입력 내용과 관련된 잘 작성된 프롬프트 예시3 (핵심 단어는 **굵게** 표시)","tags":["역할 명시","구체적 요청","제약 조건"]}
+    {"text":"입력 주제와 관련된 잘 작성된 프롬프트 예시 (핵심 단어 **굵게**)","tags":["역할 명시","맥락 제공"]},
+    {"text":"다른 각도의 관련 프롬프트 예시 (핵심 단어 **굵게**)","tags":["구체적 요청","형식 지정"]},
+    {"text":"또 다른 관련 프롬프트 예시 (핵심 단어 **굵게**)","tags":["역할 명시","구체적 요청","제약 조건"]}
   ],
   "p2Examples": [
-    {"text":"입력 내용을 반영한 완성도 높은 프롬프트 예시1 (핵심 단어는 **굵게** 표시)","tags":["역할 명시","맥락 제공","형식 지정"]},
-    {"text":"입력 내용을 반영한 완성도 높은 프롬프트 예시2 (핵심 단어는 **굵게** 표시)","tags":["역할 명시","구체적 요청","제약 조건"]},
-    {"text":"입력 내용을 반영한 완성도 높은 프롬프트 예시3 (핵심 단어는 **굵게** 표시)","tags":["역할 명시","맥락 제공","구체적 요청","형식 지정"]}
+    {
+      "structured": {"역할":"역할 내용","맥락":"맥락 내용","요청":"요청 내용","형식":"형식 내용","제약":"제약 내용"},
+      "tags":["역할 명시","맥락 제공","형식 지정"]
+    },
+    {
+      "structured": {"역할":"역할 내용","맥락":"맥락 내용","요청":"요청 내용","형식":"형식 내용","제약":"제약 내용"},
+      "tags":["역할 명시","구체적 요청","제약 조건"]
+    },
+    {
+      "structured": {"역할":"역할 내용","맥락":"맥락 내용","요청":"요청 내용","형식":"형식 내용","제약":"제약 내용"},
+      "tags":["역할 명시","맥락 제공","구체적 요청","형식 지정"]
+    }
   ]
 }
 
-structFields는 입력 주제에 맞는 구체적인 항목 5개를 만들어줘.
-예) "축구 게임을 만들고 싶어" → [선수 캐릭터, 이동 방향, 공 움직임, 점수 규칙, 화면 크기]
-예) "초등학교 수업 자료" → [학년/과목, 학습 목표, 수업 시간, 활동 방식, 주의사항]
+structFields 규칙:
+- 입력 주제에 딱 맞는 항목 5개를 만들어줘.
+- 예) "축구 게임 html" → [주인공 캐릭터 모습, 이동 방향키, 공 움직임, 점수 규칙, 화면 크기]
+- 예) "수학 수업 자료" → [학년/과목, 학습 목표, 수업 시간, 활동 방식, 어려운 단어 제한]
+- hint는 학생이 실제로 입력할 수 있는 구체적인 예시 문장으로 작성해줘.
+
+p2Examples의 structured 규칙:
+- 입력 주제와 관련된 실제 프롬프트를 항목별로 나눠서 작성해줘.
+- 각 항목은 1-2문장으로 간결하게.
 `);
 
-    // 구조화 필드 렌더링
     structFields = result.structFields;
-    renderStructForm();
-
-    // 힌트 예시 렌더링
     hintExamples = result.hintExamples;
-    hi = 0;
-    renderHint();
-
-    // 패널2 예시 렌더링
     p2Examples = result.p2Examples;
-    p2i = 0;
+    hi = 0; p2i = 0;
+    renderStructForm();
+    renderHint();
     renderP2();
-
   } catch(e) {
     console.error(e);
-    document.getElementById('struct-form-wrap').innerHTML = '<div class="struct-empty">항목 생성 실패. 다시 시도해주세요.</div>';
-    document.getElementById('hint-card').innerHTML = '<span style="color:#bbb;font-size:12px;">예시를 불러오지 못했어요.</span>';
+    document.getElementById('hint-card').innerHTML = '<span style="color:#bbb;font-size:12px;">예시를 불러오지 못했어요. 잠시 후 다시 시도해보세요.</span>';
+    document.getElementById('struct-form-wrap').innerHTML = '<div class="struct-empty">항목 생성에 실패했어요. 잠시 후 다시 시도해보세요.</div>';
   }
 }
 
-// ── 구조화 폼 렌더링 ──
+// 구조화 폼
 function renderStructForm() {
   const wrap = document.getElementById('struct-form-wrap');
   wrap.innerHTML = structFields.map(f => `
-    <div class="struct-field" style="margin-bottom:8px;">
-      <div class="struct-label"><span class="s-badge">${f.emoji} ${f.label}</span></div>
-      <textarea class="struct-input" id="sf-${f.key}" rows="2"
-        placeholder="${f.placeholder}" oninput="buildStructPrompt()"></textarea>
+    <div class="struct-field">
+      <div class="struct-label-row">
+        <div class="struct-lbl"><span class="s-badge">${f.emoji} ${f.label}</span></div>
+        <span class="struct-hint" onclick="fillHint('${f.key}','${encodeURIComponent(f.hint)}')">예시 넣기</span>
+      </div>
+      <input class="struct-input" id="sf-${f.key}" type="text" placeholder="${f.hint}" oninput="buildStruct()">
     </div>`).join('');
   document.getElementById('struct-preview').style.display = 'block';
-  document.getElementById('struct-preview-text').textContent = '항목을 입력하면 자동으로 조합돼요.';
-  document.getElementById('struct-preview-text').style.color = '#aaa';
+  buildStruct();
 }
 
-window.buildStructPrompt = function() {
-  const parts = structFields.map(f => {
+window.fillHint = function(key, encoded) {
+  const el = document.getElementById(`sf-${key}`);
+  if (el) { el.value = decodeURIComponent(encoded); buildStruct(); }
+};
+
+window.buildStruct = function() {
+  const rows = document.getElementById('struct-rows');
+  const icons = {"역할":"👤","맥락":"🌍","요청":"🎯","형식":"📄","제약":"🚫"};
+  const filled = structFields.map(f => {
+    const el = document.getElementById(`sf-${f.key}`);
+    const val = el ? el.value.trim() : '';
+    return val ? {label: f.label, val, emoji: f.emoji} : null;
+  }).filter(Boolean);
+
+  if (filled.length === 0) {
+    rows.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;">항목을 입력하면 여기에 완성된 프롬프트가 나타나!</div>';
+  } else {
+    rows.innerHTML = filled.map(f => `
+      <div class="struct-row">
+        <div class="struct-row-lbl">${f.emoji} ${f.label}</div>
+        <div class="struct-row-val">${f.val}</div>
+      </div>`).join('');
+  }
+};
+
+function getStructText() {
+  return structFields.map(f => {
     const el = document.getElementById(`sf-${f.key}`);
     const val = el ? el.value.trim() : '';
     return val ? `[${f.label}] ${val}` : '';
-  }).filter(Boolean);
-  const preview = document.getElementById('struct-preview-text');
-  if (parts.length === 0) {
-    preview.style.color = '#aaa';
-    preview.textContent = '항목을 입력하면 자동으로 조합돼요.';
-  } else {
-    preview.style.color = '#26215C';
-    preview.textContent = parts.join(' / ');
-  }
-};
-
-window.copyStructPrompt = function() {
-  const text = document.getElementById('struct-preview-text').textContent;
-  if (!text || text === '항목을 입력하면 자동으로 조합돼요.') return;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '✓ 복사됨';
-    setTimeout(() => btn.textContent = '복사', 2000);
-  });
-};
-
-// ── 현재 프롬프트 ──
-function getCurrentPrompt() {
-  const isStruct = document.getElementById('tab-struct').style.display !== 'none';
-  if (isStruct) {
-    const t = document.getElementById('struct-preview-text').textContent;
-    return t === '항목을 입력하면 자동으로 조합돼요.' ? '' : t;
-  }
-  return document.getElementById('prompt-input').value.trim();
+  }).filter(Boolean).join(' / ');
 }
 
-// ── 힌트 예시 렌더링 ──
+window.copyStruct = function() {
+  const text = getStructText();
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => showCopied('copyStruct'));
+};
+window.applyStruct = function() {
+  const text = getStructText();
+  if (!text) return;
+  document.getElementById('prompt-input').value = text;
+  window.switchTab('free');
+};
+
+// 힌트 예시
 const tagColors = {"역할 명시":"t-role","맥락 제공":"t-ctx","구체적 요청":"t-task","형식 지정":"t-fmt","제약 조건":"t-fmt"};
 
 function renderHint() {
   if (!hintExamples.length) return;
   const e = hintExamples[hi];
   const c = document.getElementById('hint-card');
-  c.style.opacity = '0';
-  setTimeout(() => {
-    const plainText = e.text.replace(/\*\*(.*?)\*\*/g,'$1');
-    c.innerHTML = `
-      <button class="card-copy-btn" onclick="copyText(this,'${encodeURIComponent(plainText)}')">복사</button>
-      ${e.text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}
-      <div class="etags">${e.tags.map(t=>`<span class="etag ${tagColors[t]||'t-role'}">${t}</span>`).join('')}</div>`;
+  c.style.opacity='0';
+  setTimeout(()=>{
+    currentHintText = e.text.replace(/\*\*(.*?)\*\*/g,'$1');
+    c.innerHTML = e.text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>') +
+      `<div class="etags">${e.tags.map(t=>`<span class="etag ${tagColors[t]||'t-role'}">${t}</span>`).join('')}</div>`;
+    document.getElementById('hint-actions').style.display = 'flex';
     makeDots('hint-dots', hintExamples.length, hi);
-    c.style.opacity = '1';
-  }, 150);
+    c.style.opacity='1';
+  },150);
 }
-window.hintNext = ()=>{ if(hintExamples.length){hi=(hi+1)%hintExamples.length;renderHint();} };
-window.hintPrev = ()=>{ if(hintExamples.length){hi=(hi-1+hintExamples.length)%hintExamples.length;renderHint();} };
+window.hintNext=()=>{if(hintExamples.length){hi=(hi+1)%hintExamples.length;renderHint();}};
+window.hintPrev=()=>{if(hintExamples.length){hi=(hi-1+hintExamples.length)%hintExamples.length;renderHint();}};
+window.copyHint=()=>{ navigator.clipboard.writeText(currentHintText).then(()=>showCopied('copyHint')); };
+window.applyHint=()=>{ document.getElementById('prompt-input').value = currentHintText; };
 
-// ── 패널2 예시 렌더링 ──
+// 패널2
 function renderP2() {
   if (!p2Examples.length) return;
   const e = p2Examples[p2i];
   const c = document.getElementById('p2-card');
-  c.style.opacity = '0';
-  setTimeout(() => {
-    const plainText = e.text.replace(/\*\*(.*?)\*\*/g,'$1');
-    c.innerHTML = `
-      <button class="card-copy-btn" onclick="copyText(this,'${encodeURIComponent(plainText)}')">복사</button>
-      ${e.text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')}`;
+  c.style.opacity='0';
+  setTimeout(()=>{
+    const s = e.structured;
+    const icons = {"역할":"👤","맥락":"🌍","요청":"🎯","형식":"📄","제약":"🚫"};
+    const rowsHtml = Object.entries(s).filter(([,v])=>v).map(([k,v])=>`
+      <div class="p2-row">
+        <div class="p2-row-lbl">${icons[k]||''} ${k}</div>
+        <div class="p2-row-val">${v}</div>
+      </div>`).join('');
+    c.innerHTML = `<div class="p2-struct">${rowsHtml}</div>`;
+    currentP2Text = Object.entries(s).filter(([,v])=>v).map(([k,v])=>`[${k}] ${v}`).join(' / ');
     document.getElementById('p2-tags').innerHTML = e.tags.map(t=>`<span class="etag ${tagColors[t]||'t-role'}">${t}</span>`).join('');
+    document.getElementById('p2-actions').style.display = 'flex';
     makeDots('p2-dots', p2Examples.length, p2i);
-    c.style.opacity = '1';
-  }, 150);
+    c.style.opacity='1';
+  },150);
 }
-window.p2Next = ()=>{ if(p2Examples.length){p2i=(p2i+1)%p2Examples.length;renderP2();} };
-window.p2Prev = ()=>{ if(p2Examples.length){p2i=(p2i-1+p2Examples.length)%p2Examples.length;renderP2();} };
+window.p2Next=()=>{if(p2Examples.length){p2i=(p2i+1)%p2Examples.length;renderP2();}};
+window.p2Prev=()=>{if(p2Examples.length){p2i=(p2i-1+p2Examples.length)%p2Examples.length;renderP2();}};
+window.copyP2=()=>{ navigator.clipboard.writeText(currentP2Text).then(()=>showCopied('copyP2')); };
+window.applyP2=()=>{ document.getElementById('prompt-input').value = currentP2Text; window.switchTab('free'); };
 
-// ── 복사 공통 함수 ──
-window.copyText = function(btn, encoded) {
-  navigator.clipboard.writeText(decodeURIComponent(encoded)).then(()=>{
-    btn.textContent='✓ 복사됨';
-    setTimeout(()=>btn.textContent='복사',2000);
-  });
-};
+function showCopied(id) {
+  const map = {copyHint:'.hint-box .btn-sm', copyStruct:'.struct-preview-actions .btn-sm', copyP2:'#p2-actions .btn-sm'};
+  const el = document.querySelector(map[id]);
+  if (el) { const prev=el.textContent; el.textContent='✓ 복사됨!'; setTimeout(()=>el.textContent=prev,2000); }
+}
 
 function makeDots(id, total, cur) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.innerHTML = '';
-  for(let i=0;i<total;i++){
-    const d=document.createElement('div');
-    d.className='dot'+(i===cur?' on':'');
-    el.appendChild(d);
-  }
+  el.innerHTML='';
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i===cur?' on':'');el.appendChild(d);}
 }
 
-// ── 평가 ──
-const EVAL_PROMPT = `당신은 AI 프롬프트 전문 평가자입니다. 반드시 JSON만 응답하세요.
-[평가기준] 역할명시(20점), 맥락제공(20점), 구체적요청(25점), 형식지정(20점), 제약조건(15점)
+// 평가
+const EVAL_PROMPT = `당신은 초등학교 고학년~중학교 1학년 학생의 AI 프롬프트 작성 실력을 키워주는 선생님이에요.
+학생이 작성한 프롬프트를 평가하고 반드시 JSON만 응답하세요. 피드백은 쉽고 친근한 말투로 써주세요.
+
+[평가기준]
+역할명시(20점): 내가 누구인지, 어떤 상황인지 썼나요?
+맥락제공(20점): 왜 필요한지, 배경 설명이 있나요?
+구체적요청(25점): 원하는 것을 정확하게 썼나요?
+형식지정(20점): 어떻게 답해주길 원하는지 썼나요?
+제약조건(15점): 분량, 수준, 주의사항 등을 썼나요?
+
 [응답형식]
-{"score":숫자,"breakdown":{"역할 명시":숫자,"맥락 제공":숫자,"구체적 요청":숫자,"형식 지정":숫자,"제약 조건":숫자},"good":["잘된점1","잘된점2"],"improve":["보완점1","보완점2"],"suggestion":{"역할":"개선된 역할 문장","목적":"개선된 목적 문장","맥락":"개선된 맥락 문장","형식":"개선된 형식 문장","제약":"개선된 제약 문장"}}`;
+{
+  "score": 숫자,
+  "breakdown": {"역할 명시":숫자,"맥락 제공":숫자,"구체적 요청":숫자,"형식 지정":숫자,"제약 조건":숫자},
+  "good": ["잘한 점 (친근한 말투로)","잘한 점2"],
+  "improve": ["이렇게 추가해봐! (구체적 행동으로)","이렇게 추가해봐!2"],
+  "suggestion": {
+    "역할": "개선된 역할 문장",
+    "맥락": "개선된 맥락 문장",
+    "요청": "개선된 요청 문장",
+    "형식": "개선된 형식 문장",
+    "제약": "개선된 제약 문장"
+  }
+}`;
+
+function getCurrentPrompt() {
+  const isStruct = document.getElementById('tab-struct').style.display !== 'none';
+  if (isStruct) {
+    const text = getStructText();
+    return text || '';
+  }
+  return document.getElementById('prompt-input').value.trim();
+}
 
 window.runEvaluate = async function() {
   const prompt = getCurrentPrompt();
-  if (!prompt) { alert('프롬프트를 입력해주세요!'); return; }
+  if (!prompt) { alert('프롬프트를 입력해줘!'); return; }
   if (!GEMINI_KEY) { alert('API 키를 불러오는 중이에요. 잠시 후 다시 눌러주세요.'); return; }
 
   const btn = document.getElementById('submit-btn');
   btn.disabled=true; btn.textContent='평가 중...';
-  document.getElementById('result-body').innerHTML='<div class="loading">Gemini가 평가 중이에요...</div>';
+  document.getElementById('result-body').innerHTML='<div class="loading">✨ Gemini가 열심히 평가 중이에요...</div>';
 
   try {
-    const result = await callGemini(EVAL_PROMPT + '\n\n[학생 프롬프트]\n' + prompt);
+    const result = await callGemini(EVAL_PROMPT+'\n\n[학생 프롬프트]\n'+prompt);
     await addDoc(collection(db,'evaluations'),{prompt, score:result.score, createdAt:new Date().toISOString()});
-    renderResult(result);
+    renderResult(result, prompt);
   } catch(e) {
     document.getElementById('result-body').innerHTML=
       `<div class="placeholder">오류가 발생했어요.<br><small style="color:#E24B4A">${e.message}</small></div>`;
@@ -450,40 +544,73 @@ window.runEvaluate = async function() {
   btn.disabled=false; btn.textContent='제출해서 평가받기';
 };
 
-function renderResult(r) {
+function renderResult(r, originalPrompt) {
   const maxes={"역할 명시":20,"맥락 제공":20,"구체적 요청":25,"형식 지정":20,"제약 조건":15};
-  const sugIcons={"역할":"👤","목적":"🎯","맥락":"🌍","형식":"📄","제약":"🚫"};
+  const icons={"역할":"👤","맥락":"🌍","요청":"🎯","형식":"📄","제약":"🚫"};
+
+  const scoreColor = r.score >= 80 ? '#1D9E75' : r.score >= 60 ? '#BA7517' : '#E24B4A';
+  const scoreMsg = r.score >= 80 ? '훌륭해요! 🎉' : r.score >= 60 ? '잘 하고 있어요! 👍' : '더 발전할 수 있어요! 💪';
+
   const bdHtml=Object.entries(r.breakdown).map(([k,v])=>`
     <div class="bd-item">
       <div style="display:flex;justify-content:space-between;"><div class="bd-name">${k}</div><div class="bd-score">${v}</div></div>
       <div class="bd-bar"><div class="bd-fill" style="width:${Math.round(v/maxes[k]*100)}%"></div></div>
     </div>`).join('');
-  const goodHtml=r.good.map(g=>`<div class="fb-item"><span style="color:#1D9E75;font-weight:700;">✓</span> ${g}</div>`).join('');
-  const impHtml=r.improve.map(i=>`<div class="fb-item"><span style="color:#BA7517;font-weight:700;">△</span> ${i}</div>`).join('');
-  const sug=r.suggestion;
-  const sugHtml=typeof sug==='object'
+
+  const goodHtml = r.good.map(g=>`<div class="fb-item"><span style="color:#1D9E75;font-size:14px;">✓</span> ${g}</div>`).join('');
+  const impHtml = r.improve.map(i=>`<div class="fb-item"><span style="color:#534AB7;font-size:14px;">→</span> ${i}</div>`).join('');
+
+  const sug = r.suggestion;
+  const sugHtml = typeof sug==='object'
     ? Object.entries(sug).filter(([,v])=>v).map(([k,v])=>`
         <div class="sug-row">
-          <div class="sug-row-label">${sugIcons[k]||''} ${k}</div>
+          <div class="sug-row-lbl">${icons[k]||''} ${k}</div>
           <div class="sug-row-val">${v}</div>
         </div>`).join('')
     : `<div class="sug-row"><div class="sug-row-val">${sug}</div></div>`;
 
+  const sugText = typeof sug==='object'
+    ? Object.entries(sug).filter(([,v])=>v).map(([k,v])=>`[${k}] ${v}`).join(' / ')
+    : sug;
+
   document.getElementById('result-body').innerHTML=`
     <div class="score-row">
-      <div class="score-circle"><div class="score-num">${r.score}</div><div class="score-den">/ 100</div></div>
+      <div class="score-circle">
+        <div class="score-num" style="color:${scoreColor}">${r.score}</div>
+        <div class="score-den">/ 100</div>
+      </div>
       <div style="flex:1;">
-        <div style="font-size:12px;color:#888;">전체 완성도</div>
-        <div class="score-bar"><div class="score-fill" style="width:${r.score}%"></div></div>
+        <div style="font-size:13px;font-weight:600;color:${scoreColor};margin-bottom:4px;">${scoreMsg}</div>
+        <div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${scoreColor}"></div></div>
       </div>
     </div>
     <div class="breakdown">${bdHtml}</div>
-    <div class="fb-list">${goodHtml}${impHtml}</div>
+    <div class="fb-section">
+      <div class="fb-label">✅ 잘 했어요</div>
+      ${goodHtml}
+    </div>
+    <div class="fb-section">
+      <div class="fb-label">💡 이렇게 추가해봐!</div>
+      ${impHtml}
+    </div>
     <div class="sug-block">
-      <div class="sug-label">✦ 이렇게 수정해보세요</div>
-      <div class="sug-structured">${sugHtml}</div>
+      <div class="sug-header">
+        <div class="sug-label">✦ 수정된 프롬프트</div>
+      </div>
+      <div class="sug-rows">${sugHtml}</div>
+      <button class="apply-btn" onclick="applySuggestion('${encodeURIComponent(sugText)}')">
+        ✏️ 이 프롬프트로 수정해서 다시 도전하기
+      </button>
     </div>`;
 }
+
+window.applySuggestion = function(encoded) {
+  const text = decodeURIComponent(encoded);
+  document.getElementById('prompt-input').value = text;
+  window.switchTab('free');
+  window.scrollTo({top:0, behavior:'smooth'});
+  document.getElementById('prompt-input').focus();
+};
 </script>
 </body>
 </html>
