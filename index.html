@@ -11,17 +11,38 @@
   .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
   .panel { background: white; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
   .panel-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
-  .panel-num { width: 20px; height: 20px; border-radius: 50%; background: #EEEDFE; color: #3C3489; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .panel-num { width: 20px; height: 20px; border-radius: 50%; background: #EEEDFE; color: #3C3489; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .panel-body { padding: 14px; }
   .panel-left { grid-column: 1; grid-row: 1 / 3; }
   .panel-right-top { grid-column: 2; grid-row: 1; }
   .panel-right-bot { grid-column: 2; grid-row: 2; }
-  textarea { width: 100%; min-height: 160px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; background: #fafafa; }
+
+  /* 탭 */
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 12px; background: #f5f5f5; border-radius: 8px; padding: 3px; }
+  .tab { flex: 1; padding: 7px; border: none; background: transparent; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: #888; font-family: inherit; transition: all 0.15s; }
+  .tab.active { background: white; color: #534AB7; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  /* 자유 입력 */
+  textarea { width: 100%; min-height: 150px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; background: #fafafa; line-height: 1.6; }
   textarea:focus { border-color: #7F77DD; background: white; }
-  .hint-box { margin-top: 12px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border: 1px solid #f0f0f0; }
+
+  /* 구조화 입력 */
+  .struct-form { display: flex; flex-direction: column; gap: 8px; }
+  .struct-field { display: flex; flex-direction: column; gap: 4px; }
+  .struct-label { font-size: 11px; font-weight: 700; color: #534AB7; display: flex; align-items: center; gap: 5px; }
+  .struct-label span { background: #EEEDFE; border-radius: 4px; padding: 1px 6px; }
+  .struct-input { border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; background: #fafafa; resize: none; min-height: 44px; line-height: 1.6; }
+  .struct-input:focus { border-color: #7F77DD; background: white; }
+  .struct-preview { margin-top: 8px; background: #EEEDFE; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #3C3489; line-height: 1.7; border: 1px solid #AFA9EC; }
+  .struct-preview-label { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+
+  /* 힌트 */
+  .hint-box { margin-top: 10px; background: #fafafa; border-radius: 8px; padding: 10px 12px; border: 1px solid #f0f0f0; }
   .hint-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .hint-item { font-size: 12px; color: #666; padding: 4px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
   .hint-item:last-child { border-bottom: none; }
+
+  /* 슬라이더 */
   .example-slider { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
   .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .slider-label { font-size: 11px; font-weight: 700; color: #1D9E75; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -30,7 +51,7 @@
   .dots { display: flex; gap: 3px; }
   .dot { width: 5px; height: 5px; border-radius: 50%; background: #ddd; }
   .dot.on { background: #7F77DD; }
-  .example-card { font-size: 12px; color: #555; line-height: 1.7; background: white; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 70px; transition: opacity 0.2s; }
+  .example-card { font-size: 12px; color: #555; line-height: 1.7; background: white; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 60px; transition: opacity 0.2s; }
   .example-card b { color: #222; }
   .etags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
   .etag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
@@ -38,12 +59,19 @@
   .t-ctx  { background: #FBEAF0; color: #72243E; }
   .t-task { background: #EAF3DE; color: #3B6D11; }
   .t-fmt  { background: #FAEEDA; color: #633806; }
-  .submit-btn { width: 100%; margin-top: 12px; padding: 11px; background: #534AB7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .loading-small { font-size: 11px; color: #7F77DD; padding: 8px 0; }
+
+  .submit-btn { width: 100%; margin-top: 10px; padding: 11px; background: #534AB7; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .submit-btn:hover { background: #3C3489; }
   .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* 패널2 */
   .good-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #E1F5EE; color: #0F6E56; font-weight: 600; margin-bottom: 8px; }
-  .p2-text { font-size: 12px; color: #555; line-height: 1.7; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 100px; transition: opacity 0.2s; }
+  .p2-text { font-size: 12px; color: #555; line-height: 1.7; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; min-height: 80px; transition: opacity 0.2s; }
   .p2-text b { color: #222; }
+  .p2-loading { font-size: 12px; color: #7F77DD; padding: 20px 0; text-align: center; }
+
+  /* 패널3 */
   .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .score-circle { width: 56px; height: 56px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; }
   .score-num { font-size: 22px; font-weight: 700; color: #3C3489; line-height: 1; }
@@ -56,14 +84,22 @@
   .bd-bar { height: 4px; background: #e8e8e8; border-radius: 2px; overflow: hidden; }
   .bd-fill { height: 100%; background: #AFA9EC; border-radius: 2px; }
   .bd-score { color: #534AB7; font-weight: 700; font-size: 12px; }
-  .fb-list { margin-bottom: 10px; }
+  .fb-list { margin-bottom: 12px; }
   .fb-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; color: #555; line-height: 1.5; }
   .fb-item:last-child { border-bottom: none; }
+
+  /* 수정 제안 — 구조화 표시 */
   .sug-block { margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
   .sug-label { font-size: 11px; font-weight: 700; color: #534AB7; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .sug-card { font-size: 12px; color: #555; background: #EEEDFE; border: 1px solid #AFA9EC; border-radius: 8px; padding: 10px 12px; line-height: 1.7; }
+  .sug-structured { display: flex; flex-direction: column; gap: 6px; }
+  .sug-row { background: #EEEDFE; border-radius: 8px; padding: 8px 12px; font-size: 12px; line-height: 1.6; }
+  .sug-row-label { font-size: 10px; font-weight: 700; color: #7F77DD; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+  .sug-row-val { color: #26215C; }
+  .sug-row-val .diff { background: #AFA9EC; color: #1a1660; border-radius: 3px; padding: 0 4px; font-weight: 600; }
+
   .placeholder { text-align: center; padding: 28px 0; color: #bbb; font-size: 13px; }
   .loading { text-align: center; padding: 24px 0; color: #7F77DD; font-size: 13px; }
+
   @media (max-width: 700px) {
     .layout { grid-template-columns: 1fr; }
     .panel-left, .panel-right-top, .panel-right-bot { grid-column: 1; grid-row: auto; }
@@ -79,25 +115,65 @@
   <div class="panel panel-left">
     <div class="panel-header"><div class="panel-num">1</div> 내 프롬프트 작성</div>
     <div class="panel-body">
-      <textarea id="prompt-input" placeholder="여기에 Gemini에게 보낼 프롬프트를 입력하세요."></textarea>
-      <div class="hint-box">
-        <div class="hint-label">이런 내용을 추가해보세요</div>
-        <div class="hint-item">👤 나는 누구인가요? (역할, 직업)</div>
-        <div class="hint-item">🎯 이 결과물을 누가 읽나요?</div>
-        <div class="hint-item">📄 어떤 형식으로 출력할까요?</div>
-        <div class="hint-item">🚫 포함하지 말았으면 하는 것?</div>
-        <div class="example-slider">
-          <div class="slider-header">
-            <div class="slider-label">💡 프롬프트 예시</div>
-            <div class="slider-nav-btns">
-              <button class="snav" onclick="hintPrev()"><</button>
-              <div class="dots" id="hint-dots"></div>
-              <button class="snav" onclick="hintNext()">></button>
+
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('free')">✏️ 자유 입력</button>
+        <button class="tab" onclick="switchTab('struct')">🧩 구조화 입력</button>
+      </div>
+
+      <!-- 자유 입력 -->
+      <div id="tab-free">
+        <textarea id="prompt-input" placeholder="여기에 Gemini에게 보낼 프롬프트를 입력하세요.&#10;&#10;예) 나는 초등학교 교사야. 3학년 학생들에게 분수 개념을 재미있게 설명해줘." oninput="onPromptInput()"></textarea>
+        <div class="hint-box">
+          <div class="hint-label">이런 내용을 추가해보세요</div>
+          <div class="hint-item">👤 나는 누구인가요? (역할, 직업)</div>
+          <div class="hint-item">🎯 이 결과물을 누가 읽나요?</div>
+          <div class="hint-item">📄 어떤 형식으로 출력할까요?</div>
+          <div class="hint-item">🚫 포함하지 말았으면 하는 것?</div>
+          <div class="example-slider">
+            <div class="slider-header">
+              <div class="slider-label">💡 프롬프트 예시</div>
+              <div class="slider-nav-btns">
+                <button class="snav" onclick="hintPrev()"><</button>
+                <div class="dots" id="hint-dots"></div>
+                <button class="snav" onclick="hintNext()">></button>
+              </div>
             </div>
+            <div id="hint-card" class="example-card"></div>
           </div>
-          <div class="example-card" id="hint-card"></div>
         </div>
       </div>
+
+      <!-- 구조화 입력 -->
+      <div id="tab-struct" style="display:none;">
+        <div class="struct-form">
+          <div class="struct-field">
+            <div class="struct-label"><span>👤 역할</span> 나는 누구인가요?</div>
+            <textarea class="struct-input" id="s-role" rows="2" placeholder="예) 초등학교 3학년 담임 교사" oninput="buildPrompt()"></textarea>
+          </div>
+          <div class="struct-field">
+            <div class="struct-label"><span>🎯 목적</span> 무엇을 원하나요?</div>
+            <textarea class="struct-input" id="s-task" rows="2" placeholder="예) 분수 개념을 재미있게 설명하는 수업 자료를 만들고 싶어" oninput="buildPrompt()"></textarea>
+          </div>
+          <div class="struct-field">
+            <div class="struct-label"><span>🌍 맥락</span> 배경 정보가 있나요?</div>
+            <textarea class="struct-input" id="s-ctx" rows="2" placeholder="예) 학생들이 분수를 처음 배우는 거야. 피자 소재를 쓰면 좋겠어." oninput="buildPrompt()"></textarea>
+          </div>
+          <div class="struct-field">
+            <div class="struct-label"><span>📄 형식</span> 어떻게 출력할까요?</div>
+            <textarea class="struct-input" id="s-fmt" rows="2" placeholder="예) 5분 분량, 학생 참여 활동 1가지 포함, 단계별로 설명" oninput="buildPrompt()"></textarea>
+          </div>
+          <div class="struct-field">
+            <div class="struct-label"><span>🚫 제약</span> 빼야 할 내용이 있나요?</div>
+            <textarea class="struct-input" id="s-limit" rows="2" placeholder="예) 너무 어려운 수학 용어는 쓰지 마" oninput="buildPrompt()"></textarea>
+          </div>
+          <div class="struct-preview">
+            <div class="struct-preview-label">✦ 완성된 프롬프트 미리보기</div>
+            <div id="struct-preview-text" style="color:#aaa;font-size:12px;">위 항목을 입력하면 자동으로 조합돼요.</div>
+          </div>
+        </div>
+      </div>
+
       <button class="submit-btn" id="submit-btn" onclick="runEvaluate()">제출해서 평가받기</button>
     </div>
   </div>
@@ -114,7 +190,7 @@
           <button class="snav" onclick="p2Next()">></button>
         </div>
       </div>
-      <div class="p2-text" id="p2-text"></div>
+      <div class="p2-text" id="p2-text"><span style="color:#bbb;font-size:12px;">프롬프트를 입력하면 관련 예시가 표시돼요.</span></div>
       <div class="etags" id="p2-tags" style="margin-top:8px;"></div>
     </div>
   </div>
@@ -133,7 +209,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, doc, getDoc, addDoc, collection }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ★ firebaseConfig를 실제 내 값으로 교체하세요
 const firebaseConfig = {
   apiKey: "AIzaSyCX_blcSTiQTGcj4bn-NC-OArXGJDD07yU",
   authDomain: "prompt-evaluator-f3544.firebaseapp.com",
@@ -147,38 +222,159 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let GEMINI_KEY = "";
 
-// Firestore에서 Gemini API 키 로드
 async function loadKey() {
   try {
     const snap = await getDoc(doc(db, "config", "keys"));
-    if (snap.exists()) {
-      GEMINI_KEY = snap.data().geminiKey;
-    } else {
-      console.warn("config/keys 문서가 없습니다.");
-    }
-  } catch(e) {
-    console.error("키 로드 실패:", e);
-  }
+    if (snap.exists()) GEMINI_KEY = snap.data().geminiKey;
+  } catch(e) { console.error("키 로드 실패:", e); }
 }
 loadKey();
 
-// 예시 데이터
-const hintExamples = [
-  { text: "나는 <b>중학교 2학년 국어 교사</b>야. 학생들에게 시의 운율을 처음 가르치는데, 쉬운 예시 시 3편과 운율 특징을 <b>표로 정리</b>해줘. <b>중학생 수준</b>으로.", tags:["t-role","t-ctx","t-fmt"] },
-  { text: "나는 <b>스타트업 마케터</b>야. 친환경 텀블러 인스타 캡션을 써줘. 타깃은 <b>20대 여성</b>, <b>150자 이내</b>, 이모지 포함, 행동 유도 문구 넣어줘.", tags:["t-role","t-ctx","t-fmt","t-task"] },
-  { text: "나는 <b>취업 준비생</b>이야. IT 회사 자기소개서 <b>첫 문단</b>을 써줘. 강점은 문제해결력·협업. <b>800자 이내</b>, 자연스러운 어투.", tags:["t-role","t-ctx","t-fmt"] }
-];
-const p2Examples = [
-  { text: "나는 <b>초등 3학년 담임 교사</b>야. 분수 기본 개념을 <b>피자 소재</b>로 재미있게 설명해줘. <b>5분 분량</b>, 학생 <b>참여 활동 1가지</b> 포함.", tags:["t-role","t-ctx","t-task","t-fmt"] },
-  { text: "나는 <b>고등학교 수학 교사</b>야. 이차함수 최댓값·최솟값 <b>40분 수업 계획서</b>를 만들어줘. 개념→예제→연습 순서, 난이도 하·중·상 각 1문제씩.", tags:["t-role","t-task","t-fmt","t-ctx"] },
-  { text: "나는 <b>중학교 영어 교사</b>야. 현재완료 예문 <b>10개</b> 만들어줘. 각 예문마다 <b>한국어 번역</b>과 현재완료 이유를 <b>한 문장</b>으로.", tags:["t-role","t-task","t-fmt"] }
-];
-const tagLabels = { "t-role":"역할 명시","t-ctx":"맥락 제공","t-task":"구체적 요청","t-fmt":"형식 지정" };
+// 탭 전환
+window.switchTab = function(tab) {
+  document.getElementById('tab-free').style.display = tab==='free' ? 'block' : 'none';
+  document.getElementById('tab-struct').style.display = tab==='struct' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='free')||(i===1&&tab==='struct')));
+};
 
-let hi=0, p2i=0;
+// 구조화 입력 → 프롬프트 조합
+window.buildPrompt = function() {
+  const role  = document.getElementById('s-role').value.trim();
+  const task  = document.getElementById('s-task').value.trim();
+  const ctx   = document.getElementById('s-ctx').value.trim();
+  const fmt   = document.getElementById('s-fmt').value.trim();
+  const limit = document.getElementById('s-limit').value.trim();
+  const parts = [];
+  if (role)  parts.push(`나는 ${role}야.`);
+  if (task)  parts.push(task + '.');
+  if (ctx)   parts.push(ctx + '.');
+  if (fmt)   parts.push(fmt + '.');
+  if (limit) parts.push(limit + '.');
+  const preview = document.getElementById('struct-preview-text');
+  if (parts.length === 0) {
+    preview.style.color = '#aaa';
+    preview.textContent = '위 항목을 입력하면 자동으로 조합돼요.';
+  } else {
+    preview.style.color = '#26215C';
+    preview.textContent = parts.join(' ');
+  }
+};
+
+// 현재 프롬프트 가져오기
+function getCurrentPrompt() {
+  const activeTab = document.getElementById('tab-struct').style.display === 'block' ? 'struct' : 'free';
+  if (activeTab === 'struct') {
+    return document.getElementById('struct-preview-text').textContent.replace('위 항목을 입력하면 자동으로 조합돼요.','').trim();
+  }
+  return document.getElementById('prompt-input').value.trim();
+}
+
+// 프롬프트 입력 시 패널2 예시 업데이트 트리거
+let p2Timer = null;
+window.onPromptInput = function() {
+  clearTimeout(p2Timer);
+  p2Timer = setTimeout(() => updateP2Examples(), 1500);
+};
+
+// Gemini 호출 공통 함수
+async function callGemini(prompt) {
+  const isNewKey = GEMINI_KEY.startsWith('AQ.');
+  const url = isNewKey
+    ? 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
+    : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_KEY}`;
+  const headers = { 'Content-Type': 'application/json' };
+  if (isNewKey) headers['x-goog-api-key'] = GEMINI_KEY;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(`API 오류 ${res.status}: ${err?.error?.message || '알 수 없는 오류'}`);
+  }
+  const data = await res.json();
+  return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+// 패널2: 입력 프롬프트 관련 예시 동적 생성
+let p2Examples = [];
+let p2i = 0;
+
+async function updateP2Examples() {
+  const prompt = getCurrentPrompt();
+  if (!prompt || !GEMINI_KEY) return;
+  document.getElementById('p2-text').innerHTML = '<div class="p2-loading">관련 예시 생성 중...</div>';
+  document.getElementById('p2-tags').innerHTML = '';
+  try {
+    const result = await callGemini(`
+다음 프롬프트와 같은 주제/맥락으로 잘 작성된 프롬프트 예시 3개를 만들어줘.
+각 예시는 역할, 맥락, 구체적 요청, 형식, 제약 조건을 잘 포함해야 해.
+반드시 JSON만 응답해.
+
+[입력 프롬프트]
+${prompt}
+
+[응답 형식]
+{"examples":[
+  {"text":"완성된 프롬프트 예시1","tags":["역할 명시","맥락 제공","형식 지정"]},
+  {"text":"완성된 프롬프트 예시2","tags":["역할 명시","구체적 요청","제약 조건"]},
+  {"text":"완성된 프롬프트 예시3","tags":["역할 명시","맥락 제공","구체적 요청","형식 지정"]}
+]}`);
+    p2Examples = result.examples;
+    p2i = 0;
+    renderP2();
+  } catch(e) {
+    document.getElementById('p2-text').innerHTML = '<span style="color:#bbb;font-size:12px;">예시를 불러오지 못했어요.</span>';
+  }
+}
+
+function renderP2() {
+  if (!p2Examples.length) return;
+  const e = p2Examples[p2i];
+  const t = document.getElementById('p2-text');
+  t.style.opacity = '0';
+  setTimeout(() => {
+    t.innerHTML = e.text.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+    const tagColors = {"역할 명시":"t-role","맥락 제공":"t-ctx","구체적 요청":"t-task","형식 지정":"t-fmt","제약 조건":"t-fmt"};
+    document.getElementById('p2-tags').innerHTML = e.tags.map(tag =>
+      `<span class="etag ${tagColors[tag]||'t-role'}">${tag}</span>`).join('');
+    makeDots('p2-dots', p2Examples.length, p2i);
+    t.style.opacity = '1';
+  }, 150);
+}
+window.p2Next = () => { if(p2Examples.length){ p2i=(p2i+1)%p2Examples.length; renderP2(); }};
+window.p2Prev = () => { if(p2Examples.length){ p2i=(p2i-1+p2Examples.length)%p2Examples.length; renderP2(); }};
+
+// 힌트 예시 (정적)
+const hintExamples = [
+  { text: "나는 <b>중학교 2학년 국어 교사</b>야. 시의 운율을 처음 가르치는데, 예시 시 3편과 운율 특징을 <b>표로 정리</b>해줘. <b>중학생 수준</b>으로.", tags:["t-role","t-ctx","t-fmt"] },
+  { text: "나는 <b>스타트업 마케터</b>야. 친환경 텀블러 인스타 캡션을 써줘. 타깃은 <b>20대 여성</b>, <b>150자 이내</b>, 이모지 포함.", tags:["t-role","t-ctx","t-fmt","t-task"] },
+  { text: "나는 <b>취업 준비생</b>이야. IT 회사 자기소개서 <b>첫 문단</b>을 써줘. <b>800자 이내</b>, 자연스러운 어투.", tags:["t-role","t-ctx","t-fmt"] }
+];
+const tagLabels = {"t-role":"역할 명시","t-ctx":"맥락 제공","t-task":"구체적 요청","t-fmt":"형식 지정"};
+let hi = 0;
+
+function renderHint() {
+  const e = hintExamples[hi];
+  const c = document.getElementById('hint-card');
+  c.style.opacity = '0';
+  setTimeout(() => {
+    c.innerHTML = e.text + '<div class="etags">' + e.tags.map(t=>`<span class="etag ${t}">${tagLabels[t]}</span>`).join('') + '</div>';
+    makeDots('hint-dots', hintExamples.length, hi);
+    c.style.opacity = '1';
+  }, 150);
+}
+window.hintNext = () => { hi=(hi+1)%hintExamples.length; renderHint(); };
+window.hintPrev = () => { hi=(hi-1+hintExamples.length)%hintExamples.length; renderHint(); };
+renderHint();
 
 function makeDots(id, total, cur) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.innerHTML = '';
   for(let i=0;i<total;i++){
     const d=document.createElement('div');
@@ -186,80 +382,44 @@ function makeDots(id, total, cur) {
     el.appendChild(d);
   }
 }
-function renderHint() {
-  const e=hintExamples[hi];
-  const c=document.getElementById('hint-card');
-  c.style.opacity='0';
-  setTimeout(()=>{
-    c.innerHTML=e.text+'<div class="etags">'+e.tags.map(t=>`<span class="etag ${t}">${tagLabels[t]}</span>`).join('')+'</div>';
-    makeDots('hint-dots',hintExamples.length,hi);
-    c.style.opacity='1';
-  },150);
-}
-function renderP2() {
-  const e=p2Examples[p2i];
-  const t=document.getElementById('p2-text');
-  t.style.opacity='0';
-  setTimeout(()=>{
-    t.innerHTML=e.text;
-    document.getElementById('p2-tags').innerHTML=e.tags.map(t=>`<span class="etag ${t}">${tagLabels[t]}</span>`).join('');
-    makeDots('p2-dots',p2Examples.length,p2i);
-    t.style.opacity='1';
-  },150);
-}
 
-window.hintNext=()=>{hi=(hi+1)%hintExamples.length;renderHint();}
-window.hintPrev=()=>{hi=(hi-1+hintExamples.length)%hintExamples.length;renderHint();}
-window.p2Next=()=>{p2i=(p2i+1)%p2Examples.length;renderP2();}
-window.p2Prev=()=>{p2i=(p2i-1+p2Examples.length)%p2Examples.length;renderP2();}
-
-renderHint();
-renderP2();
-
+// 평가
 const SYSTEM_PROMPT = `당신은 AI 프롬프트 전문 평가자입니다. 학생이 작성한 프롬프트를 평가하고 반드시 JSON만 응답하세요.
 [평가기준] 역할명시(20점), 맥락제공(20점), 구체적요청(25점), 형식지정(20점), 제약조건(15점)
 [응답형식]
-{"score":숫자,"breakdown":{"역할 명시":숫자,"맥락 제공":숫자,"구체적 요청":숫자,"형식 지정":숫자,"제약 조건":숫자},"good":["잘된점1","잘된점2"],"improve":["보완점1","보완점2"],"suggestion":"수정된 프롬프트 전체 예시"}`;
+{"score":숫자,"breakdown":{"역할 명시":숫자,"맥락 제공":숫자,"구체적 요청":숫자,"형식 지정":숫자,"제약 조건":숫자},"good":["잘된점1","잘된점2"],"improve":["보완점1","보완점2"],"suggestion":{"역할":"개선된 역할 문장","목적":"개선된 목적 문장","맥락":"개선된 맥락 문장","형식":"개선된 형식 문장","제약":"개선된 제약 문장"}}`;
 
 window.runEvaluate = async function() {
-  const prompt = document.getElementById('prompt-input').value.trim();
-  if(!prompt){ alert('프롬프트를 입력해주세요!'); return; }
-  if(!GEMINI_KEY){ alert('API 키를 불러오는 중이에요. 잠시 후 다시 눌러주세요.'); return; }
+  const prompt = getCurrentPrompt();
+  if (!prompt) { alert('프롬프트를 입력해주세요!'); return; }
+  if (!GEMINI_KEY) { alert('API 키를 불러오는 중이에요. 잠시 후 다시 눌러주세요.'); return; }
 
   const btn = document.getElementById('submit-btn');
-  btn.disabled=true;
-  btn.textContent='평가 중...';
-  document.getElementById('result-body').innerHTML='<div class="loading">Gemini가 평가 중이에요...</div>';
+  btn.disabled = true;
+  btn.textContent = '평가 중...';
+  document.getElementById('result-body').innerHTML = '<div class="loading">Gemini가 평가 중이에요...</div>';
+
+  // 패널2 예시도 동시에 업데이트
+  updateP2Examples();
 
   try {
-    // 새 키 형식(AQ.Ab8...) 은 v1alpha 엔드포인트 + Authorization 헤더 방식 사용
     const isNewKey = GEMINI_KEY.startsWith('AQ.');
-    let res;
+    const url = isNewKey
+      ? 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
+      : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_KEY}`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (isNewKey) headers['x-goog-api-key'] = GEMINI_KEY;
 
-    if (isNewKey) {
-      res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_KEY
-        },
-        body: JSON.stringify({
-          contents:[{parts:[{text: SYSTEM_PROMPT+'\n\n[학생 프롬프트]\n'+prompt}]}],
-          generationConfig:{responseMimeType:'application/json'}
-        })
-      });
-    } else {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          contents:[{parts:[{text: SYSTEM_PROMPT+'\n\n[학생 프롬프트]\n'+prompt}]}],
-          generationConfig:{responseMimeType:'application/json'}
-        })
-      });
-    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: SYSTEM_PROMPT + '\n\n[학생 프롬프트]\n' + prompt }] }],
+        generationConfig: { responseMimeType: 'application/json' }
+      })
+    });
 
-    if(!res.ok) {
+    if (!res.ok) {
       const err = await res.json();
       throw new Error(`API 오류 ${res.status}: ${err?.error?.message || '알 수 없는 오류'}`);
     }
@@ -267,21 +427,17 @@ window.runEvaluate = async function() {
     const data = await res.json();
     const result = JSON.parse(data.candidates[0].content.parts[0].text);
 
-    // Firestore에 저장
-    await addDoc(collection(db,'evaluations'),{
-      prompt,
-      score: result.score,
-      createdAt: new Date().toISOString()
+    await addDoc(collection(db, 'evaluations'), {
+      prompt, score: result.score, createdAt: new Date().toISOString()
     });
 
     renderResult(result);
   } catch(e) {
-    document.getElementById('result-body').innerHTML=
+    document.getElementById('result-body').innerHTML =
       `<div class="placeholder">오류가 발생했어요.<br><small style="color:#E24B4A">${e.message}</small></div>`;
   }
-
-  btn.disabled=false;
-  btn.textContent='제출해서 평가받기';
+  btn.disabled = false;
+  btn.textContent = '제출해서 평가받기';
 };
 
 function renderResult(r) {
@@ -289,15 +445,25 @@ function renderResult(r) {
   const bdHtml = Object.entries(r.breakdown).map(([k,v])=>`
     <div class="bd-item">
       <div style="display:flex;justify-content:space-between;">
-        <div class="bd-name">${k}</div>
-        <div class="bd-score">${v}</div>
+        <div class="bd-name">${k}</div><div class="bd-score">${v}</div>
       </div>
       <div class="bd-bar"><div class="bd-fill" style="width:${Math.round(v/maxes[k]*100)}%"></div></div>
     </div>`).join('');
   const goodHtml = r.good.map(g=>`<div class="fb-item"><span style="color:#1D9E75;font-weight:700;">✓</span> ${g}</div>`).join('');
   const impHtml  = r.improve.map(i=>`<div class="fb-item"><span style="color:#BA7517;font-weight:700;">△</span> ${i}</div>`).join('');
 
-  document.getElementById('result-body').innerHTML=`
+  // 수정 제안 — 구조화 표시
+  const sug = r.suggestion;
+  const sugLabels = {"역할":"👤 역할","목적":"🎯 목적","맥락":"🌍 맥락","형식":"📄 형식","제약":"🚫 제약"};
+  const sugHtml = typeof sug === 'object'
+    ? Object.entries(sug).filter(([,v])=>v).map(([k,v])=>`
+        <div class="sug-row">
+          <div class="sug-row-label">${sugLabels[k]||k}</div>
+          <div class="sug-row-val">${v}</div>
+        </div>`).join('')
+    : `<div class="sug-row"><div class="sug-row-val">${sug}</div></div>`;
+
+  document.getElementById('result-body').innerHTML = `
     <div class="score-row">
       <div class="score-circle">
         <div class="score-num">${r.score}</div>
@@ -312,7 +478,7 @@ function renderResult(r) {
     <div class="fb-list">${goodHtml}${impHtml}</div>
     <div class="sug-block">
       <div class="sug-label">✦ 이렇게 수정해보세요</div>
-      <div class="sug-card">${r.suggestion}</div>
+      <div class="sug-structured">${sugHtml}</div>
     </div>`;
 }
 </script>
